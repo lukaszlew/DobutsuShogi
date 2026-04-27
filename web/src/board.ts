@@ -132,7 +132,9 @@ function buildHandStrip(
       const isSelected = side === 'human' && selected?.kind === 'hand' && selected.piece === p && i === pieces.indexOf(p);
       const cls = isSelected ? 'piece-slot selected' : 'piece-slot';
       const interactive = side === 'human' ? `data-hand-piece="${p}"` : '';
-      return `<svg class="${cls}" ${interactive} viewBox="0 0 ${HAND_PIECE_SIZE} ${HAND_PIECE_SIZE}" width="${HAND_PIECE_SIZE}" height="${HAND_PIECE_SIZE}" xmlns="http://www.w3.org/2000/svg">${pieceSvg(p, owner, HAND_PIECE_SIZE)}</svg>`;
+      // Hand pieces render at 1:1 — drop the tile outline to avoid the
+      // diagonal-vs-orthogonal AA disparity that's visible at this scale.
+      return `<svg class="${cls}" ${interactive} viewBox="0 0 ${HAND_PIECE_SIZE} ${HAND_PIECE_SIZE}" width="${HAND_PIECE_SIZE}" height="${HAND_PIECE_SIZE}" xmlns="http://www.w3.org/2000/svg">${pieceSvg(p, owner, HAND_PIECE_SIZE, { stroke: false })}</svg>`;
     })
     .join('');
 
