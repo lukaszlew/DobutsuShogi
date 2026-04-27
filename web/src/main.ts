@@ -375,7 +375,7 @@ class GameRunner {
     if (this.engine.outcomeNow() !== 'Ongoing') {
       // Game ended: the mover delivered the win — fill all depths with ±M.
       const decisive = mover === 'human' ? 10000 : -10000;
-      evals = Array(10).fill(decisive);
+      evals = Array(this.config.depth + 2).fill(decisive);
     } else {
       // After the move, side-to-move is the OTHER side. Search returns
       // a score from that side's POV — flip if the mover was the player.

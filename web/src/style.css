@@ -128,8 +128,10 @@ html, body {
 }
 .move-log .mv-rows {
   display: grid;
-  /* ply, side, notation, then 10 fixed depth columns. */
-  grid-template-columns: auto auto minmax(70px, 1fr) repeat(10, minmax(34px, auto));
+  /* ply, side, notation, then N depth columns set via --depth-cols. */
+  grid-template-columns:
+    auto auto minmax(70px, 1fr)
+    repeat(var(--depth-cols, 10), minmax(30px, auto));
   column-gap: 6px;
   row-gap: 3px;
   align-items: baseline;

@@ -149,9 +149,14 @@ function fmtEval(n: number): string {
 }
 
 function buildMoveLog(entries: readonly MoveLogEntry[]): string {
+  const header = '<div class="mv-header">Move log</div>';
+  if (entries.length === 0) {
+    return `<div class="move-log">${header}<div class="mv-empty">No moves yet.</div></div>`;
+  }
+  const N = entries[0]!.evals.length;
   const headerRow = `<div class="mv-head-row">
     <span></span><span></span><span></span>
-    ${Array.from({ length: 10 }, (_, i) => `<span>d${i + 1}</span>`).join('')}
+    ${Array.from({ length: N }, (_, i) => `<span>d${i + 1}</span>`).join('')}
   </div>`;
   const rows = entries
     .map((e, i) => {
@@ -162,11 +167,7 @@ function buildMoveLog(entries: readonly MoveLogEntry[]): string {
       return `<div class="mv-row ${moverCls}"><span class="mv-num">${ply}.</span><span class="mv-side">${moverLabel}</span><span class="mv-text">${e.notation}</span>${evalCells}</div>`;
     })
     .join('');
-  const header = '<div class="mv-header">Move log</div>';
-  const body = entries.length === 0
-    ? '<div class="mv-empty">No moves yet.</div>'
-    : `<div class="mv-rows">${headerRow}${rows}</div>`;
-  return `<div class="move-log">${header}${body}</div>`;
+  return `<div class="move-log">${header}<div class="mv-rows" style="--depth-cols:${N}">${headerRow}${rows}</div></div>`;
 }
 
 function outcomeText(outcome: Outcome, humansTurn: boolean): string {
