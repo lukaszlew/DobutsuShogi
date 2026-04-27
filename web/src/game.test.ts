@@ -57,8 +57,8 @@ class FakeWasmGame implements WasmGame {
     return { mv: 0xff, eval: 0 };
   }
 
-  eval_at_depth(_config: AiConfig): number {
-    return 0;
+  eval_log(_config: AiConfig): Int32Array {
+    return new Int32Array(10);
   }
 
   humans_turn(): boolean {
@@ -190,6 +190,6 @@ describe('GameEngine — pass-throughs', () => {
     expect(e.handHuman()).toEqual({ chick: 0, elephant: 0, giraffe: 0 });
     expect(e.handAi()).toEqual({ chick: 0, elephant: 0, giraffe: 0 });
     expect(e.searchAi(TEST_CONFIG)).toEqual({ mv: 0xff, eval: 0 });
-    expect(e.evalAtDepth(TEST_CONFIG)).toBe(0);
+    expect(e.evalLog(TEST_CONFIG)).toEqual(Array(10).fill(0));
   });
 });

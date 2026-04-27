@@ -24,8 +24,9 @@ export type MoveLogEntry = {
   mover: 'human' | 'ai';
   /** Pre-formatted notation like "Cb2→b3" or "*Eb2". */
   notation: string;
-  /** Position eval after this move (player POV); MATE-magnitude for terminal. */
-  eval: number;
+  /** Position eval at depths 1..=10 after this move (player POV);
+   *  MATE-magnitude for terminal positions. */
+  evals: number[];
 };
 
 export interface RenderCallbacks {
@@ -150,7 +151,13 @@ function buildMoveLog(entries: readonly MoveLogEntry[]): string {
       const ply = i + 1;
       const moverCls = e.mover === 'human' ? 'mv-p' : 'mv-ai';
       const moverLabel = e.mover === 'human' ? 'P' : 'AI';
-      return `<div class="mv-row ${moverCls}"><span class="mv-num">${ply}.</span><span class="mv-side">${moverLabel}</span><span class="mv-text">${e.notation}</span><span class="mv-eval">${fmtEval(e.eval)}</span></div>`;
+      const evalCells = e.evals
+        .map((v, d) => `<span class="mv-d"><span class="mv-d-n">${d + 1}:</span>${fmtEval(v)}</span>`)
+        .join('');
+      return `<div class="mv-row ${moverCls}">
+        <div class="mv-line"><span class="mv-num">${ply}.</span><span class="mv-side">${moverLabel}</span><span class="mv-text">${e.notation}</span></div>
+        <div class="mv-evals">${evalCells}</div>
+      </div>`;
     })
     .join('');
   const header = '<div class="mv-header">Move log</div>';

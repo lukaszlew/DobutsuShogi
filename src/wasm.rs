@@ -64,6 +64,9 @@ extern "C" {
     fn random() -> f64;
 }
 
+/// Number of half-move depths reported in the move-log eval breakdown.
+const EVAL_LOG_DEPTH: u32 = 10;
+
 impl AiConfig {
     fn coefs(&self) -> Coefs {
         Coefs {
@@ -145,9 +148,10 @@ impl Game {
         mv.map(|mv| AiMove { mv, eval })
     }
 
-    /// Deterministic eval at the configured depth from the current
-    /// side-to-move's perspective. Used to score each move in the log.
-    pub fn eval_at_depth(&self, config: AiConfig) -> i32 {
-        self.inner.eval_at_depth(&config.coefs(), config.depth)
+    /// Deterministic evals at depths 1..=`EVAL_LOG_DEPTH` (10) using
+    /// the supplied coefficients. Score at each depth is from the
+    /// current side-to-move's perspective. Used by the move log.
+    pub fn eval_log(&self, config: AiConfig) -> Vec<i32> {
+        self.inner.eval_log(&config.coefs(), EVAL_LOG_DEPTH)
     }
 }

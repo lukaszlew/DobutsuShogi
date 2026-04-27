@@ -116,6 +116,15 @@ fn negamax(s: &State, coefs: &Coefs, depth: u32, ply: u32, mut alpha: i32, beta:
     best
 }
 
+/// Run a deterministic search at every depth from 1 to `max_depth` and
+/// return the score reported at each. Used to surface how the engine's
+/// evaluation evolves with depth in the move log.
+pub fn iterative_evals(s: &State, coefs: &Coefs, max_depth: u32) -> Vec<i32> {
+    (1..=max_depth)
+        .map(|d| search(s, coefs, d, || 0).score)
+        .collect()
+}
+
 /// Search the position to `depth` half-moves and return the best root move.
 ///
 /// `jitter` is called once per candidate root move to perturb its score

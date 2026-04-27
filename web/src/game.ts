@@ -24,7 +24,7 @@ export interface WasmGame {
   hand_human(): HandCounts;
   hand_ai(): HandCounts;
   ai_move(config: AiConfig): AiMove | undefined;
-  eval_at_depth(config: AiConfig): number;
+  eval_log(config: AiConfig): Int32Array;
   humans_turn(): boolean;
   free(): void;
 }
@@ -114,8 +114,9 @@ export class GameEngine {
     return this.game.ai_move(config);
   }
 
-  /** Deterministic eval at config.depth from current side-to-move's POV. */
-  evalAtDepth(config: AiConfig): number {
-    return this.game.eval_at_depth(config);
+  /** Deterministic evals at depths 1..=10 (hardcoded in wasm), from
+   *  the current side-to-move's POV. Returned as a plain number[]. */
+  evalLog(config: AiConfig): number[] {
+    return Array.from(this.game.eval_log(config));
   }
 }

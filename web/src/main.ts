@@ -366,20 +366,21 @@ class GameRunner {
   }
 
   /** Build a MoveLogEntry for a just-applied move and append it to the log.
-   *  Eval is post-move and rendered from the player's POV. */
+   *  Evals at depths 1..=10 are post-move and rendered from the player's POV. */
   private recordMove(code: number, boardBefore: Uint8Array, mover: 'human' | 'ai'): void {
     const notation = moveNotation(code, boardBefore);
-    let evalForPlayer: number;
+    let evals: number[];
     if (this.engine.outcomeNow() !== 'Ongoing') {
-      // Game ended: the mover delivered the win.
-      evalForPlayer = mover === 'human' ? 10000 : -10000;
+      // Game ended: the mover delivered the win — fill all depths with ±M.
+      const decisive = mover === 'human' ? 10000 : -10000;
+      evals = Array(10).fill(decisive);
     } else {
       // After the move, side-to-move is the OTHER side. Search returns
       // a score from that side's POV — flip if the mover was the player.
-      const score = this.engine.evalAtDepth(this.config);
-      evalForPlayer = mover === 'human' ? -score : score;
+      const sideToMoveEvals = this.engine.evalLog(this.config);
+      evals = mover === 'human' ? sideToMoveEvals.map((s) => -s) : sideToMoveEvals;
     }
-    this.moveLog.push({ mover, notation, eval: evalForPlayer });
+    this.moveLog.push({ mover, notation, evals });
   }
 
   private async playAiMove(): Promise<void> {
