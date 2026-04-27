@@ -56,10 +56,10 @@ impl GameLogic {
         (code, r.score)
     }
 
-    /// Deterministic eval (no jitter) at every depth from 1 to `depth`.
-    /// Scores are from the side-to-move's perspective.
-    pub fn eval_at_depths(&self, coefs: &Coefs, depth: u32) -> Vec<i32> {
-        search::iterative_evals(&self.state, coefs, depth)
+    /// Deterministic eval at the given depth (no jitter).
+    /// Score is from the side-to-move's perspective.
+    pub fn eval_at_depth(&self, coefs: &Coefs, depth: u32) -> i32 {
+        search::search(&self.state, coefs, depth, || 0).score
     }
 
     pub fn board_bytes(&self) -> Vec<u8> {

@@ -74,38 +74,86 @@ html, body {
   position: relative;
 }
 
-.eval-log {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  column-gap: 12px;
-  row-gap: 4px;
-  align-items: center;
-  width: min(95vw, 480px);
-  font-size: 13px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  margin-top: 4px;
-  padding: 8px 12px;
+.play-area {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  width: min(95vw, 720px);
+}
+.play-area .board {
+  flex: 0 1 auto;
+}
+.play-area .move-log {
+  flex: 1 1 200px;
+  min-width: 180px;
+  max-width: 240px;
+}
+@media (max-width: 600px) {
+  .play-area {
+    flex-direction: column;
+  }
+  .play-area .move-log {
+    max-width: none;
+    max-height: 220px;
+  }
+}
+
+.move-log {
   border: 1px solid var(--stroke);
   border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  overflow-y: auto;
 }
-.eval-log .eval-label {
+.move-log .mv-header {
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: var(--disabled);
   font-weight: 500;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #e5e5dc;
 }
-.eval-log .eval-cells {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 12px;
+.move-log .mv-empty {
+  color: var(--disabled);
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
 }
-.eval-log .eval-cell {
-  display: inline-flex;
+.move-log .mv-rows {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  column-gap: 8px;
+  row-gap: 2px;
   align-items: baseline;
-  gap: 4px;
+}
+.move-log .mv-row {
+  display: contents;
+}
+.move-log .mv-num {
+  color: var(--disabled);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.move-log .mv-side {
+  font-weight: 600;
+}
+.move-log .mv-row.mv-ai .mv-side {
+  color: #b06000;
+}
+.move-log .mv-row.mv-p .mv-side {
+  color: #2a5fa6;
+}
+.move-log .mv-text {
   font-variant-numeric: tabular-nums;
 }
-.eval-log .eval-d {
-  color: var(--disabled);
-  font-size: 11px;
+.move-log .mv-eval {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
 .controls {

@@ -1,11 +1,6 @@
 export type Outcome = 'Ongoing' | 'LionCaptured' | 'Try';
 export type HandCounts = { chick: number; elephant: number; giraffe: number };
-export type AiMove = {
-  mv: number;
-  eval: number;
-  /** Deterministic eval at depths 1..=config.depth, from AI's POV. */
-  evals_per_depth: number[];
-};
+export type AiMove = { mv: number; eval: number };
 
 /** Search depth + leaf-eval coefficients + root-jitter magnitude.
  *  Matches the Rust `AiConfig` struct. */
@@ -29,7 +24,7 @@ export interface WasmGame {
   hand_human(): HandCounts;
   hand_ai(): HandCounts;
   ai_move(config: AiConfig): AiMove | undefined;
-  eval_at_depths(config: AiConfig): Int32Array;
+  eval_at_depth(config: AiConfig): number;
   humans_turn(): boolean;
   free(): void;
 }
@@ -119,8 +114,8 @@ export class GameEngine {
     return this.game.ai_move(config);
   }
 
-  /** Deterministic eval at depths 1..=config.depth from current side-to-move's POV. */
-  evalAtDepths(config: AiConfig): number[] {
-    return Array.from(this.game.eval_at_depths(config));
+  /** Deterministic eval at config.depth from current side-to-move's POV. */
+  evalAtDepth(config: AiConfig): number {
+    return this.game.eval_at_depth(config);
   }
 }

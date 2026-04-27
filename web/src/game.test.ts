@@ -54,11 +54,11 @@ class FakeWasmGame implements WasmGame {
   }
 
   ai_move(_config: AiConfig): AiMove | undefined {
-    return { mv: 0xff, eval: 0, evals_per_depth: [0] };
+    return { mv: 0xff, eval: 0 };
   }
 
-  eval_at_depths(_config: AiConfig): Int32Array {
-    return new Int32Array([0]);
+  eval_at_depth(_config: AiConfig): number {
+    return 0;
   }
 
   humans_turn(): boolean {
@@ -189,7 +189,7 @@ describe('GameEngine — pass-throughs', () => {
     expect(e.board().length).toBe(12);
     expect(e.handHuman()).toEqual({ chick: 0, elephant: 0, giraffe: 0 });
     expect(e.handAi()).toEqual({ chick: 0, elephant: 0, giraffe: 0 });
-    expect(e.searchAi(TEST_CONFIG)).toEqual({ mv: 0xff, eval: 0, evals_per_depth: [0] });
-    expect(e.evalAtDepths(TEST_CONFIG)).toEqual([0]);
+    expect(e.searchAi(TEST_CONFIG)).toEqual({ mv: 0xff, eval: 0 });
+    expect(e.evalAtDepth(TEST_CONFIG)).toBe(0);
   });
 });

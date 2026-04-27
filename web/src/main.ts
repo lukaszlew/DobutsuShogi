@@ -1,13 +1,36 @@
 import init, { Game as WasmGameClass, default_ai_config } from '../pkg/dobutsu_shogi.js';
-import { renderBoard, type RenderState, type Selection } from './board';
+import { renderBoard, type MoveLogEntry, type RenderState, type Selection } from './board';
 import { GameEngine, type AiConfig, type WasmGame } from './game';
 import { decodeMove, moveFrom, moveTo } from './move-codec';
 import { type Piece, pieceSvg } from './pieces';
 
+function squareCoord(sq: number): string {
+  return `${'abc'[sq % 3]}${Math.floor(sq / 3) + 1}`;
+}
+
+const PIECE_LETTER_BY_LOW_NIBBLE = ['?', 'L', 'G', 'E', 'C', 'H'];
+
+function pieceLetterFromByte(byte: number): string {
+  return PIECE_LETTER_BY_LOW_NIBBLE[byte & 0x7f] ?? '?';
+}
+
+function pieceLetterFromName(p: 'chick' | 'elephant' | 'giraffe'): string {
+  return p === 'chick' ? 'C' : p === 'elephant' ? 'E' : 'G';
+}
+
+function moveNotation(code: number, boardBefore: Uint8Array): string {
+  const m = decodeMove(code);
+  if (m.kind === 'slide') {
+    const piece = pieceLetterFromByte(boardBefore[m.from]!);
+    return `${piece}${squareCoord(m.from)}→${squareCoord(m.to)}`;
+  }
+  return `*${pieceLetterFromName(m.piece)}${squareCoord(m.to)}`;
+}
+
 const AI_MIN_THINK_MS = 250;
 
 const FIELD_BOUNDS: Record<keyof AiConfig, [number, number]> = {
-  depth: [1, 8],
+  depth: [1, 12],
   randomness: [0, 30],
   chick: [0, 99],
   elephant: [0, 99],
@@ -184,8 +207,7 @@ class GameRunner {
   private lastMove: { from: number | null; to: number } | null = null;
   private thinking = false;
   private disposed = false;
-  /** Eval scores per depth, signed positive = good for player. */
-  private evalLog: { ai: number[]; you: number[] } | null = null;
+  private moveLog: MoveLogEntry[] = [];
 
   constructor(humanPlaysFirst: boolean, private readonly config: AiConfig) {
     this.engine = new GameEngine(humanPlaysFirst, wasmFactory);
@@ -224,7 +246,7 @@ class GameRunner {
       legalDropTargets,
       lastMove: this.lastMove,
       outcome,
-      evalLog: this.evalLog,
+      moveLog: this.moveLog,
     };
 
     renderBoard(HOST, state, {
@@ -329,16 +351,35 @@ class GameRunner {
 
   private applyHumanMove(code: number): void {
     const decoded = decodeMove(code);
+    const boardBefore = this.engine.board().slice();
     this.engine.applyMove(code);
     this.lastMove = {
       from: decoded.kind === 'slide' ? decoded.from : null,
       to: decoded.to,
     };
+    this.recordMove(code, boardBefore, 'human');
     this.selection = null;
     this.render();
     if (this.engine.outcomeNow() === 'Ongoing') {
       void this.playAiMove();
     }
+  }
+
+  /** Build a MoveLogEntry for a just-applied move and append it to the log.
+   *  Eval is post-move and rendered from the player's POV. */
+  private recordMove(code: number, boardBefore: Uint8Array, mover: 'human' | 'ai'): void {
+    const notation = moveNotation(code, boardBefore);
+    let evalForPlayer: number;
+    if (this.engine.outcomeNow() !== 'Ongoing') {
+      // Game ended: the mover delivered the win.
+      evalForPlayer = mover === 'human' ? 10000 : -10000;
+    } else {
+      // After the move, side-to-move is the OTHER side. Search returns
+      // a score from that side's POV — flip if the mover was the player.
+      const score = this.engine.evalAtDepth(this.config);
+      evalForPlayer = mover === 'human' ? -score : score;
+    }
+    this.moveLog.push({ mover, notation, eval: evalForPlayer });
   }
 
   private async playAiMove(): Promise<void> {
@@ -358,20 +399,13 @@ class GameRunner {
       return;
     }
     const decoded = decodeMove(ai.mv);
-    // AI's evals are from the AI's POV — negate so positive = good for player.
-    const aiEvals = ai.evals_per_depth.map((s) => -s);
+    const boardBefore = this.engine.board().slice();
     this.engine.applyMove(ai.mv);
     this.lastMove = {
       from: decoded.kind === 'slide' ? decoded.from : null,
       to: decoded.to,
     };
-    // After applying, side-to-move is the player; this eval is already
-    // from the player's POV so positive = good for player.
-    const youEvals =
-      this.engine.outcomeNow() === 'Ongoing'
-        ? this.engine.evalAtDepths(this.config)
-        : [];
-    this.evalLog = { ai: aiEvals, you: youEvals };
+    this.recordMove(ai.mv, boardBefore, 'ai');
     this.render();
   }
 
@@ -379,7 +413,8 @@ class GameRunner {
     this.engine.undo();
     this.selection = null;
     this.lastMove = null;
-    this.evalLog = null;
+    // engine.undo replays all but the last 2 moves; mirror that on the log.
+    this.moveLog = this.moveLog.slice(0, -2);
     this.render();
   }
 }

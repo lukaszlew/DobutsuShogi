@@ -16,9 +16,17 @@ export interface RenderState {
   legalDropTargets: Set<number>;
   lastMove: { from: number | null; to: number } | null;
   outcome: Outcome;
-  /** Eval scores per depth (positive = good for player). */
-  evalLog: { ai: number[]; you: number[] } | null;
+  /** Half-move log; eval is from the player's POV (positive = good for player). */
+  moveLog: MoveLogEntry[];
 }
+
+export type MoveLogEntry = {
+  mover: 'human' | 'ai';
+  /** Pre-formatted notation like "Cb2→b3" or "*Eb2". */
+  notation: string;
+  /** Position eval after this move (player POV); MATE-magnitude for terminal. */
+  eval: number;
+};
 
 export interface RenderCallbacks {
   onSquareClick: (sq: number) => void;
@@ -130,14 +138,26 @@ function buildHandStrip(
   return `<div class="hand-strip ${side}"><span class="hand-pieces">${slots}</span></div>`;
 }
 
-function buildEvalLog(log: { ai: number[]; you: number[] }): string {
-  const fmt = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
-  const cells = (xs: number[]) =>
-    xs.map((v, i) => `<span class="eval-cell"><span class="eval-d">d${i + 1}</span>${fmt(v)}</span>`).join('');
-  return `<div class="eval-log">
-    <div class="eval-row"><span class="eval-label">AI</span><span class="eval-cells">${cells(log.ai)}</span></div>
-    <div class="eval-row"><span class="eval-label">You</span><span class="eval-cells">${cells(log.you)}</span></div>
-  </div>`;
+function fmtEval(n: number): string {
+  if (n >= 9000) return '+M';
+  if (n <= -9000) return '−M';
+  return n >= 0 ? `+${n}` : `−${-n}`;
+}
+
+function buildMoveLog(entries: readonly MoveLogEntry[]): string {
+  const rows = entries
+    .map((e, i) => {
+      const ply = i + 1;
+      const moverCls = e.mover === 'human' ? 'mv-p' : 'mv-ai';
+      const moverLabel = e.mover === 'human' ? 'P' : 'AI';
+      return `<div class="mv-row ${moverCls}"><span class="mv-num">${ply}.</span><span class="mv-side">${moverLabel}</span><span class="mv-text">${e.notation}</span><span class="mv-eval">${fmtEval(e.eval)}</span></div>`;
+    })
+    .join('');
+  const header = '<div class="mv-header">Move log</div>';
+  const body = entries.length === 0
+    ? '<div class="mv-empty">No moves yet.</div>'
+    : `<div class="mv-rows">${rows}</div>`;
+  return `<div class="move-log">${header}${body}</div>`;
 }
 
 function outcomeText(outcome: Outcome, humansTurn: boolean): string {
@@ -174,9 +194,9 @@ export function renderBoard(
   const undoDisabled = cb.canUndo ? '' : 'disabled';
   const controls = `<div class="controls"><button class="new-game">New game</button><button class="undo" ${undoDisabled}>Undo</button></div>`;
 
-  const evalLogHtml = state.evalLog ? buildEvalLog(state.evalLog) : '';
+  const moveLogHtml = buildMoveLog(state.moveLog);
 
-  host.innerHTML = `${aiHand}<div class="board">${board}${thinkingOverlay}</div>${humanHand}${evalLogHtml}${controls}${bannerHtml}`;
+  host.innerHTML = `${aiHand}<div class="play-area"><div class="board">${board}${thinkingOverlay}</div>${moveLogHtml}</div>${humanHand}${controls}${bannerHtml}`;
 
   // Wire up event handlers.
   host.querySelectorAll<HTMLElement>('[data-sq]').forEach((el) => {

@@ -36,13 +36,11 @@ pub struct HandCounts {
     pub giraffe: u8,
 }
 
-#[derive(Tsify, Serialize, Deserialize, Clone, Debug)]
+#[derive(Tsify, Serialize, Deserialize, Copy, Clone, Debug)]
 #[tsify(into_wasm_abi)]
 pub struct AiMove {
     pub mv: u8,
     pub eval: i32,
-    /// Deterministic evals at depths 1..=config.depth (side-to-move POV).
-    pub evals_per_depth: Vec<i32>,
 }
 
 /// AI search configuration sent from the UI: ply depth, material
@@ -143,16 +141,13 @@ impl Game {
                 (random() * (2.0 * r as f64 + 1.0)) as i32 - r
             }
         };
-        let coefs = config.coefs();
-        let evals_per_depth = self.inner.eval_at_depths(&coefs, config.depth);
-        let (mv, eval) = self.inner.ai_search(&coefs, config.depth, &mut jitter);
-        mv.map(|mv| AiMove { mv, eval, evals_per_depth })
+        let (mv, eval) = self.inner.ai_search(&config.coefs(), config.depth, &mut jitter);
+        mv.map(|mv| AiMove { mv, eval })
     }
 
-    /// Deterministic eval at depths 1..=config.depth from the current
-    /// side-to-move's perspective. Used to display the player's eval
-    /// log right after the AI's move has been applied.
-    pub fn eval_at_depths(&self, config: AiConfig) -> Vec<i32> {
-        self.inner.eval_at_depths(&config.coefs(), config.depth)
+    /// Deterministic eval at the configured depth from the current
+    /// side-to-move's perspective. Used to score each move in the log.
+    pub fn eval_at_depth(&self, config: AiConfig) -> i32 {
+        self.inner.eval_at_depth(&config.coefs(), config.depth)
     }
 }
