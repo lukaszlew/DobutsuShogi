@@ -36,6 +36,7 @@ const baseState: RenderState = {
   legalDropTargets: new Set(),
   lastMove: null,
   outcome: 'Ongoing' as Outcome,
+  evalLog: null,
 };
 
 let host: HTMLElement;

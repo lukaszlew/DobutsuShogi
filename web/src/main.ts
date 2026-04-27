@@ -184,6 +184,8 @@ class GameRunner {
   private lastMove: { from: number | null; to: number } | null = null;
   private thinking = false;
   private disposed = false;
+  /** Eval scores per depth, signed positive = good for player. */
+  private evalLog: { ai: number[]; you: number[] } | null = null;
 
   constructor(humanPlaysFirst: boolean, private readonly config: AiConfig) {
     this.engine = new GameEngine(humanPlaysFirst, wasmFactory);
@@ -222,6 +224,7 @@ class GameRunner {
       legalDropTargets,
       lastMove: this.lastMove,
       outcome,
+      evalLog: this.evalLog,
     };
 
     renderBoard(HOST, state, {
@@ -355,11 +358,20 @@ class GameRunner {
       return;
     }
     const decoded = decodeMove(ai.mv);
+    // AI's evals are from the AI's POV — negate so positive = good for player.
+    const aiEvals = ai.evals_per_depth.map((s) => -s);
     this.engine.applyMove(ai.mv);
     this.lastMove = {
       from: decoded.kind === 'slide' ? decoded.from : null,
       to: decoded.to,
     };
+    // After applying, side-to-move is the player; this eval is already
+    // from the player's POV so positive = good for player.
+    const youEvals =
+      this.engine.outcomeNow() === 'Ongoing'
+        ? this.engine.evalAtDepths(this.config)
+        : [];
+    this.evalLog = { ai: aiEvals, you: youEvals };
     this.render();
   }
 
@@ -367,6 +379,7 @@ class GameRunner {
     this.engine.undo();
     this.selection = null;
     this.lastMove = null;
+    this.evalLog = null;
     this.render();
   }
 }

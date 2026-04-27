@@ -16,6 +16,8 @@ export interface RenderState {
   legalDropTargets: Set<number>;
   lastMove: { from: number | null; to: number } | null;
   outcome: Outcome;
+  /** Eval scores per depth (positive = good for player). */
+  evalLog: { ai: number[]; you: number[] } | null;
 }
 
 export interface RenderCallbacks {
@@ -128,6 +130,16 @@ function buildHandStrip(
   return `<div class="hand-strip ${side}"><span class="hand-pieces">${slots}</span></div>`;
 }
 
+function buildEvalLog(log: { ai: number[]; you: number[] }): string {
+  const fmt = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
+  const cells = (xs: number[]) =>
+    xs.map((v, i) => `<span class="eval-cell"><span class="eval-d">d${i + 1}</span>${fmt(v)}</span>`).join('');
+  return `<div class="eval-log">
+    <div class="eval-row"><span class="eval-label">AI</span><span class="eval-cells">${cells(log.ai)}</span></div>
+    <div class="eval-row"><span class="eval-label">You</span><span class="eval-cells">${cells(log.you)}</span></div>
+  </div>`;
+}
+
 function outcomeText(outcome: Outcome, humansTurn: boolean): string {
   // After the last move, humans_turn does not flip on terminal outcomes,
   // so its current value tells us which side just won.
@@ -162,7 +174,9 @@ export function renderBoard(
   const undoDisabled = cb.canUndo ? '' : 'disabled';
   const controls = `<div class="controls"><button class="new-game">New game</button><button class="undo" ${undoDisabled}>Undo</button></div>`;
 
-  host.innerHTML = `${aiHand}<div class="board">${board}${thinkingOverlay}</div>${humanHand}${controls}${bannerHtml}`;
+  const evalLogHtml = state.evalLog ? buildEvalLog(state.evalLog) : '';
+
+  host.innerHTML = `${aiHand}<div class="board">${board}${thinkingOverlay}</div>${humanHand}${evalLogHtml}${controls}${bannerHtml}`;
 
   // Wire up event handlers.
   host.querySelectorAll<HTMLElement>('[data-sq]').forEach((el) => {

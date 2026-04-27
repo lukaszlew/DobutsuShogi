@@ -74,6 +74,40 @@ html, body {
   position: relative;
 }
 
+.eval-log {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 12px;
+  row-gap: 4px;
+  align-items: center;
+  width: min(95vw, 480px);
+  font-size: 13px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  margin-top: 4px;
+  padding: 8px 12px;
+  border: 1px solid var(--stroke);
+  border-radius: 6px;
+}
+.eval-log .eval-label {
+  color: var(--disabled);
+  font-weight: 500;
+}
+.eval-log .eval-cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+.eval-log .eval-cell {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.eval-log .eval-d {
+  color: var(--disabled);
+  font-size: 11px;
+}
+
 .controls {
   display: flex;
   gap: 12px;

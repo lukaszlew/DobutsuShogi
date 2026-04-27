@@ -56,6 +56,12 @@ impl GameLogic {
         (code, r.score)
     }
 
+    /// Deterministic eval (no jitter) at every depth from 1 to `depth`.
+    /// Scores are from the side-to-move's perspective.
+    pub fn eval_at_depths(&self, coefs: &Coefs, depth: u32) -> Vec<i32> {
+        search::iterative_evals(&self.state, coefs, depth)
+    }
+
     pub fn board_bytes(&self) -> Vec<u8> {
         // Project state to "human is Own" so emission is straightforward.
         let projected = if self.humans_turn {
