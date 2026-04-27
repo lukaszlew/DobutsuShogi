@@ -146,24 +146,23 @@ function fmtEval(n: number): string {
 }
 
 function buildMoveLog(entries: readonly MoveLogEntry[]): string {
+  const headerRow = `<div class="mv-head-row">
+    <span></span><span></span><span></span>
+    ${Array.from({ length: 10 }, (_, i) => `<span>d${i + 1}</span>`).join('')}
+  </div>`;
   const rows = entries
     .map((e, i) => {
       const ply = i + 1;
       const moverCls = e.mover === 'human' ? 'mv-p' : 'mv-ai';
       const moverLabel = e.mover === 'human' ? 'P' : 'AI';
-      const evalCells = e.evals
-        .map((v, d) => `<span class="mv-d"><span class="mv-d-n">${d + 1}:</span>${fmtEval(v)}</span>`)
-        .join('');
-      return `<div class="mv-row ${moverCls}">
-        <div class="mv-line"><span class="mv-num">${ply}.</span><span class="mv-side">${moverLabel}</span><span class="mv-text">${e.notation}</span></div>
-        <div class="mv-evals">${evalCells}</div>
-      </div>`;
+      const evalCells = e.evals.map((v) => `<span class="mv-d">${fmtEval(v)}</span>`).join('');
+      return `<div class="mv-row ${moverCls}"><span class="mv-num">${ply}.</span><span class="mv-side">${moverLabel}</span><span class="mv-text">${e.notation}</span>${evalCells}</div>`;
     })
     .join('');
   const header = '<div class="mv-header">Move log</div>';
   const body = entries.length === 0
     ? '<div class="mv-empty">No moves yet.</div>'
-    : `<div class="mv-rows">${rows}</div>`;
+    : `<div class="mv-rows">${headerRow}${rows}</div>`;
   return `<div class="move-log">${header}${body}</div>`;
 }
 
