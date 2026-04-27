@@ -1,13 +1,14 @@
 export type Piece = 'lion' | 'giraffe' | 'elephant' | 'chick' | 'hen';
 export type Owner = 'human' | 'ai';
 
-/** Pastel tile-background colours, hue-spread for clear distinctness. */
+/** Pastel tile-background colours, hue-spread for clear distinctness.
+ *  Macaron-ish palette: yellow, peach, sky blue, mint, lavender. */
 export const PIECE_BG_COLORS: Record<Piece, string> = {
-  lion: '#ecc878',     // warm gold       — hue ~44°
-  giraffe: '#ddc190',  // tan             — hue ~35°
-  elephant: '#b8cee0', // pale steel blue — hue ~207°
-  chick: '#d4e08c',    // pale lime       — hue ~75°
-  hen: '#cdb0d8',      // pale lavender   — hue ~285°
+  lion: '#f0d878',     // warm yellow   — hue ~50°
+  giraffe: '#f0c098',  // peach         — hue ~25°
+  elephant: '#a8c8e8', // sky blue      — hue ~210°
+  chick: '#b8dba8',    // mint green    — hue ~105°
+  hen: '#d8b8e0',      // lavender      — hue ~285°
 };
 
 const ARROW_COLOR = '#1a1a1a';
