@@ -87,7 +87,7 @@ pub fn default_ai_config() -> AiConfig {
         elephant: c.elephant,
         giraffe: c.giraffe,
         hen: c.hen,
-        randomness: 0,
+        randomness: 2,
     }
 }
 
