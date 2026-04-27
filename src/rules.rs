@@ -235,10 +235,10 @@ impl State {
                 let Some(to) = Sq::from_rc(sq.row() + dy, sq.col() + dx) else {
                     continue;
                 };
-                if let Some(t) = self.at(to) {
-                    if t.color == Color::Own {
-                        continue;
-                    }
+                if let Some(t) = self.at(to)
+                    && t.color == Color::Own
+                {
+                    continue;
                 }
                 out.push(Move::Slide { from: sq, to });
             }
@@ -344,10 +344,10 @@ fn is_attacked_by_opp(s: &State, target: Sq) -> bool {
             continue;
         }
         for &(dx, dy) in piece_offsets(stone.piece, Color::Opp) {
-            if let Some(to) = Sq::from_rc(sq.row() + dy, sq.col() + dx) {
-                if to == target {
-                    return true;
-                }
+            if let Some(to) = Sq::from_rc(sq.row() + dy, sq.col() + dx)
+                && to == target
+            {
+                return true;
             }
         }
     }

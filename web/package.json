@@ -1,0 +1,25 @@
+{
+  "name": "dobutsu-shogi-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -n wasm,vite -c blue,green \"npm:watch:wasm\" \"npm:watch:vite\"",
+    "watch:wasm": "cargo watch -w ../src -w ../Cargo.toml -s \"wasm-pack build --target web --out-dir web/pkg --dev\" -C ..",
+    "watch:vite": "vite",
+    "build:wasm": "cd .. && wasm-pack build --target web --out-dir web/pkg --release",
+    "build:web": "tsc --noEmit && vite build",
+    "build": "npm run build:wasm && npm run build:web",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "jsdom": "^26.0.0",
+    "typescript": "^5.7.2",
+    "vite": "^7.0.0",
+    "vitest": "^3.0.0"
+  }
+}

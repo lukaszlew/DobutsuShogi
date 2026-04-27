@@ -1,1 +1,15 @@
 /target
+**/*.rs.bk
+Cargo.lock.bak
+
+# wasm-pack output (generated)
+/web/pkg
+
+# node
+/web/node_modules
+/web/dist
+
+# editor / OS
+.vscode/
+.idea/
+.DS_Store
