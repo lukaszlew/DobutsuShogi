@@ -3,11 +3,11 @@ export type Owner = 'human' | 'ai';
 
 /** Pastel tile-background colours, hue-spread for clear distinctness. */
 export const PIECE_BG_COLORS: Record<Piece, string> = {
-  lion: '#e8c87a',     // warm gold (amber)
-  giraffe: '#f0bd8d',  // peach
-  elephant: '#b8cee0', // steel blue
-  chick: '#f4eba8',    // pale lemon
-  hen: '#e8b5b5',      // pale rose
+  lion: '#ecc878',     // warm gold       — hue ~44°
+  giraffe: '#ddc190',  // tan             — hue ~35°
+  elephant: '#b8cee0', // pale steel blue — hue ~207°
+  chick: '#d4e08c',    // pale lime       — hue ~75°
+  hen: '#cdb0d8',      // pale lavender   — hue ~285°
 };
 
 const ARROW_COLOR = '#1a1a1a';

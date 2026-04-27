@@ -142,7 +142,8 @@ function buildHandStrip(
 function fmtEval(n: number): string {
   if (n >= 9000) return '+M';
   if (n <= -9000) return '−M';
-  return n >= 0 ? `+${n}` : `−${-n}`;
+  if (n === 0) return '0';
+  return n > 0 ? `+${n}` : `−${-n}`;
 }
 
 function buildMoveLog(entries: readonly MoveLogEntry[]): string {
