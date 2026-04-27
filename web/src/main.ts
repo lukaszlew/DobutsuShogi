@@ -169,7 +169,9 @@ function showConfigModal(): void {
 }
 
 function pieceIconSvg(piece: Piece): string {
-  return `<svg viewBox="0 0 ${ICON_SIZE} ${ICON_SIZE}" width="${ICON_SIZE}" height="${ICON_SIZE}" aria-label="${piece}">${pieceSvg(piece, 'human', ICON_SIZE)}</svg>`;
+  // Stroke disabled at icon scale — diagonal/orthogonal AA mismatch is
+  // very visible at 1:1; the pastel fill alone reads well.
+  return `<svg viewBox="0 0 ${ICON_SIZE} ${ICON_SIZE}" width="${ICON_SIZE}" height="${ICON_SIZE}" aria-label="${piece}">${pieceSvg(piece, 'human', ICON_SIZE, { stroke: false })}</svg>`;
 }
 
 function adjustConfig(field: keyof AiConfig, delta: number, min: number, max: number): void {

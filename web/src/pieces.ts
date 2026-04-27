@@ -53,14 +53,22 @@ export function pieceMoves(p: Piece): readonly Cell[] {
   return MOVES[p];
 }
 
+export type PieceSvgOpts = {
+  /** Draw the tile outline. Defaults to true. Disabling avoids the
+   *  diagonal-vs-orthogonal AA disparity that's visible at small
+   *  display sizes (e.g. icons at 1:1 scale). */
+  stroke?: boolean;
+};
+
 /**
  * SVG fragment for one piece, sized to fit a `size × size` cell anchored
  * at (0, 0). Move directions render as filled triangle arrows pointing
  * outward from the piece centre. Rotated 180° when owner is `'ai'`.
  */
-export function pieceSvg(piece: Piece, owner: Owner, size: number): string {
+export function pieceSvg(piece: Piece, owner: Owner, size: number, opts: PieceSvgOpts = {}): string {
   const points = tilePoints(size);
   const bg = PIECE_BG_COLORS[piece];
+  const stroked = opts.stroke ?? true;
 
   const tipR = size * 0.32;
   const arrowLen = tipR * 0.6;
@@ -90,7 +98,10 @@ export function pieceSvg(piece: Piece, owner: Owner, size: number): string {
     })
     .join('');
 
-  const tileMarkup = `<polygon points="${points}" fill="${bg}" stroke="var(--stroke)" stroke-width="1" stroke-linejoin="round" shape-rendering="geometricPrecision" />`;
+  const tileStroke = stroked
+    ? ' stroke="var(--stroke)" stroke-width="1" stroke-linejoin="round" shape-rendering="geometricPrecision"'
+    : '';
+  const tileMarkup = `<polygon points="${points}" fill="${bg}"${tileStroke} />`;
 
   const transform = owner === 'ai' ? ` transform="rotate(180 ${size / 2} ${size / 2})"` : '';
   return `<g class="piece-svg" data-piece="${piece}" data-owner="${owner}"${transform}>${tileMarkup}${arrowMarkup}</g>`;
